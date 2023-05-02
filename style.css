@@ -1,0 +1,33 @@
+:root {
+}
+*,
+::after,
+::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+}
+body {
+}
+#wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+#gameBoard {
+  background-color: violet;
+  height: 50vmin;
+  width: 50vmin;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+.item {
+  opacity: 0.5;
+}
