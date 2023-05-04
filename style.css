@@ -21,7 +21,7 @@ body {
   margin-bottom: 2rem;
 }
 #gameBoard {
-  background-color: violet;
+  /* background-color: violet; */
   height: 50vmin;
   width: 50vmin;
   display: grid;
@@ -30,4 +30,11 @@ body {
 }
 .item {
   opacity: 0.5;
+}
+#showTurn {
+  margin-top: 2rem;
+}
+#restart {
+  margin-top: 2rem;
+  padding: 1rem;
 }
