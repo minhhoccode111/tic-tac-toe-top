@@ -1,3 +1,5 @@
+//THIS JS FILE IS TIC TAC TOE GAME HUMAN VS HUMAN AND PLAY IN THE CONSOLE
+
 function Player(name, mark) {
   const getName = () => name;
   const getMark = () => mark;
@@ -24,10 +26,10 @@ const gameBoard = (() => {
       _board[i].push(Cell());
     }
   }
-
-  // const getColumns = () => _columns;
-  // const getRows = () => _rows;
   const getBoard = () => _board;
+  const resetBoard = () => {
+    _board = _board.map((row) => row.map((col) => (col = Cell())));
+  };
   const placeMark = (row, col, player) => {
     _board[row][col].setMark(player.getMark());
   };
@@ -36,24 +38,29 @@ const gameBoard = (() => {
     console.table(printer);
   };
 
-  return { getBoard, placeMark, printBoard };
+  return { getBoard, placeMark, printBoard, resetBoard };
 })();
-const screenController = (() => {})();
 
 const gameController = ((
   playerOneName = "Player One",
   playerTwoName = "Player Two"
 ) => {
-  const { printBoard, placeMark, getBoard } = gameBoard;
-  let _board = getBoard();
-  const _screen = screenController;
+  let _board = gameBoard.getBoard();
   let _playerOne = Player(playerOneName, "x");
   let _playerTwo = Player(playerTwoName, "o");
   let _currentPlayerTurn = _playerOne;
+  const reset = document.querySelector("[data-restart]");
   const switchCurrent = () => {
     _currentPlayerTurn =
       _currentPlayerTurn === _playerOne ? _playerTwo : _playerOne;
   };
+  reset.addEventListener("click", () => {
+    gameBoard.resetBoard();
+    _board = gameBoard.getBoard();
+    _currentPlayerTurn = _playerOne;
+    playRound();
+  });
+
   const checkWin = () => {
     let wins = [
       [_board[0][0], _board[0][1], _board[0][2]],
@@ -75,7 +82,7 @@ const gameController = ((
     switchCurrent();
     playRound();
   };
-  const playRound = () => {
+  function playRound() {
     let row, col;
     let flag = true;
     while (flag) {
@@ -89,27 +96,28 @@ const gameController = ((
           `It's ${_currentPlayerTurn.getName()} turn. Which column do you choose? (Between 1 and 3!)`
         )
       );
+      row -= 1; //change back to index type
+      col -= 1;
 
       if (
         isNaN(row) ||
         isNaN(col) ||
-        row < 1 ||
-        row > 3 ||
-        col < 1 ||
-        col > 3 ||
-        _board[row - 1][col - 1].getMark() != ""
+        row < 0 ||
+        row > 2 ||
+        col < 0 ||
+        col > 2 ||
+        _board[row][col].getMark() != ""
       ) {
         alert("Invalid move");
         continue;
       }
       flag = false;
     }
-    row -= 1; //change back to index type
-    col -= 1;
-    placeMark(row, col, _currentPlayerTurn);
-    printBoard();
+
+    gameBoard.placeMark(row, col, _currentPlayerTurn);
+    gameBoard.printBoard();
     checkWin();
-  };
+  }
   return { playRound };
 })();
 
