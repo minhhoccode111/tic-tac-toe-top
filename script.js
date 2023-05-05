@@ -1,125 +1,69 @@
-//THIS JS FILE IS TIC TAC TOE GAME HUMAN VS HUMAN AND PLAY IN THE CONSOLE
+//THIS JS FILE IS STILL A TIC TAC TOE THAT HUMAN VS HUMAN BUT IT HAS AN UI FOR TWO PLAYERS TO INTERACT WITH
+const gameBoard = document.querySelector("[data-gameBoard]");
+const items = document.querySelectorAll(".item");
+const showTurn = document.querySelector("[data-showTurn]");
+const restartButton = document.querySelector("[data-restart]");
 
-function Player(name, mark) {
-  const getName = () => name;
-  const getMark = () => mark;
-  return { getName, getMark };
-}
-function Cell() {
-  let _value = "";
-  const getMark = () => _value;
-  const setMark = (mark) => {
-    _value = mark;
-  };
-  return {
-    getMark,
-    setMark,
-  };
-}
-const gameBoard = (() => {
-  const _columns = 3;
-  const _rows = 3;
-  let _board = [];
-  for (let i = 0; i < _columns; i++) {
-    _board[i] = [];
-    for (let j = 0; j < _rows; j++) {
-      _board[i].push(Cell());
-    }
-  }
-  const getBoard = () => _board;
-  const resetBoard = () => {
-    _board = _board.map((row) => row.map((col) => (col = Cell())));
-  };
-  const placeMark = (row, col, player) => {
-    _board[row][col].setMark(player.getMark());
-  };
-  const printBoard = () => {
-    let printer = _board.map((row) => row.map((col) => col.getMark()));
-    console.table(printer);
-  };
+let currentPlayer = "X";
+let gameState = ["", "", "", "", "", "", "", "", ""];
 
-  return { getBoard, placeMark, printBoard, resetBoard };
-})();
-
-const gameController = ((
-  playerOneName = "Player One",
-  playerTwoName = "Player Two"
-) => {
-  let _board = gameBoard.getBoard();
-  let _playerOne = Player(playerOneName, "x");
-  let _playerTwo = Player(playerTwoName, "o");
-  let _currentPlayerTurn = _playerOne;
-  const reset = document.querySelector("[data-restart]");
-  const switchCurrent = () => {
-    _currentPlayerTurn =
-      _currentPlayerTurn === _playerOne ? _playerTwo : _playerOne;
-  };
-  reset.addEventListener("click", () => {
-    gameBoard.resetBoard();
-    _board = gameBoard.getBoard();
-    _currentPlayerTurn = _playerOne;
-    playRound();
+function renderGameBoard() {
+  items.forEach((item, index) => {
+    item.innerHTML = `<p>${gameState[index]}</p>`;
   });
+}
 
-  const checkWin = () => {
-    let wins = [
-      [_board[0][0], _board[0][1], _board[0][2]],
-      [_board[1][0], _board[1][1], _board[1][2]],
-      [_board[2][0], _board[2][1], _board[2][2]],
-      [_board[0][0], _board[1][0], _board[2][0]],
-      [_board[0][1], _board[1][1], _board[2][1]],
-      [_board[0][2], _board[1][2], _board[2][2]],
-      [_board[0][0], _board[1][1], _board[2][2]],
-      [_board[2][0], _board[1][1], _board[0][2]],
-    ];
-    let flag = wins.some((el) =>
-      el.every((item) => item.getMark() === _currentPlayerTurn.getMark())
-    );
-    if (flag) {
-      alert(`${_currentPlayerTurn.getName()} is the winner!`);
+function handleButtonClick(event) {
+  const clickedIndex = Array.from(items).indexOf(event.target);
+  if (gameState[clickedIndex] !== "") {
+    return;
+  }
+  gameState[clickedIndex] = currentPlayer;
+  renderGameBoard();
+  checkWin();
+  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  showTurn.innerHTML = `${currentPlayer} turn`;
+}
+
+function checkWin() {
+  const winningConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < winningConditions.length; i++) {
+    const [a, b, c] = winningConditions[i];
+    if (
+      gameState[a] &&
+      gameState[a] === gameState[b] &&
+      gameState[a] === gameState[c]
+    ) {
+      showTurn.innerHTML = `${currentPlayer} wins!`;
+      gameBoard.removeEventListener("click", handleButtonClick);
+      restartButton.style.display = "block";
       return;
     }
-    switchCurrent();
-    playRound();
-  };
-  function playRound() {
-    let row, col;
-    let flag = true;
-    while (flag) {
-      row = parseInt(
-        prompt(
-          `It's ${_currentPlayerTurn.getName()} turn. Which row do you choose? (Between 1 and 3!)`
-        )
-      );
-      col = parseInt(
-        prompt(
-          `It's ${_currentPlayerTurn.getName()} turn. Which column do you choose? (Between 1 and 3!)`
-        )
-      );
-      row -= 1; //change back to index type
-      col -= 1;
-
-      if (
-        isNaN(row) ||
-        isNaN(col) ||
-        row < 0 ||
-        row > 2 ||
-        col < 0 ||
-        col > 2 ||
-        _board[row][col].getMark() != ""
-      ) {
-        alert("Invalid move");
-        continue;
-      }
-      flag = false;
-    }
-
-    gameBoard.placeMark(row, col, _currentPlayerTurn);
-    gameBoard.printBoard();
-    checkWin();
   }
-  return { playRound };
-})();
+  if (!gameState.includes("")) {
+    showTurn.innerHTML = `It's a tie!`;
+    restartButton.style.display = "block";
+  }
+}
 
-const game = gameController;
-game.playRound();
+function handleRestartClick() {
+  currentPlayer = "X";
+  gameState = ["", "", "", "", "", "", "", "", ""];
+  renderGameBoard();
+  showTurn.innerHTML = `${currentPlayer} turn`;
+  restartButton.style.display = "none";
+  gameBoard.addEventListener("click", handleButtonClick);
+}
+
+renderGameBoard();
+gameBoard.addEventListener("click", handleButtonClick);
+restartButton.addEventListener("click", handleRestartClick);

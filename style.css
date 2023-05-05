@@ -29,7 +29,10 @@ body {
   grid-template-rows: repeat(3, 1fr);
 }
 .item {
+  height: 100%;
+  width: 100%;
   opacity: 0.5;
+  font-size: 6rem;
 }
 #showTurn {
   margin-top: 2rem;
