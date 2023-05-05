@@ -1,7 +1,9 @@
 // console.log("Hello world");
 
 (function () {
-  const gameBoard = (() => {})();
-  const gameController = (() => {})();
-  const screenController = (() => {})();
+  function Player() {}
+  function Cell() {}
+  function gameBoard() {}
+  function gameController() {}
+  function screenController() {}
 })();
