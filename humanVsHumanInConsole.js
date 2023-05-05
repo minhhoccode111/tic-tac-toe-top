@@ -49,6 +49,7 @@ const gameController = ((
   let _playerOne = Player(playerOneName, "x");
   let _playerTwo = Player(playerTwoName, "o");
   let _currentPlayerTurn = _playerOne;
+  let _movesLeft = 9;
   const reset = document.querySelector("[data-restart]");
   const switchCurrent = () => {
     _currentPlayerTurn =
@@ -58,9 +59,10 @@ const gameController = ((
     gameBoard.resetBoard();
     _board = gameBoard.getBoard();
     _currentPlayerTurn = _playerOne;
+    _movesLeft = 9;
     playRound();
   });
-
+  const checkTie = () => _movesLeft === 0;
   const checkWin = () => {
     let wins = [
       [_board[0][0], _board[0][1], _board[0][2]],
@@ -77,6 +79,10 @@ const gameController = ((
     );
     if (flag) {
       alert(`${_currentPlayerTurn.getName()} is the winner!`);
+      return;
+    }
+    if (checkTie()) {
+      alert("Tie game!");
       return;
     }
     switchCurrent();
@@ -113,7 +119,7 @@ const gameController = ((
       }
       flag = false;
     }
-
+    _movesLeft--;
     gameBoard.placeMark(row, col, _currentPlayerTurn);
     gameBoard.printBoard();
     checkWin();
