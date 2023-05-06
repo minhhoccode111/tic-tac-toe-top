@@ -22,8 +22,8 @@ body {
 }
 #gameBoard {
   /* background-color: violet; */
-  height: 50vmin;
-  width: 50vmin;
+  height: 18rem;
+  width: 18rem;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
@@ -35,7 +35,7 @@ body {
   font-size: 6rem;
 }
 #showTurn {
-  margin-top: 2rem;
+  margin-top: 6rem;
 }
 #restart {
   margin-top: 2rem;
