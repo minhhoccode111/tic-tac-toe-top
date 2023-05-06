@@ -32,7 +32,8 @@ body {
   height: 100%;
   width: 100%;
   opacity: 0.5;
-  font-size: 6rem;
+  font-size: 2rem;
+  flex: 1;
 }
 #showTurn {
   margin-top: 6rem;
