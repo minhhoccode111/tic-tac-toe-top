@@ -36,7 +36,10 @@ body {
   flex: 1;
 }
 #showTurn {
-  margin-top: 6rem;
+  margin-top: 2rem;
+}
+#showWinner {
+  margin-top: 2rem;
 }
 #restart {
   margin-top: 2rem;

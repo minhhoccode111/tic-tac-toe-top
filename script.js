@@ -58,9 +58,13 @@
     let _movesLeft = 9;
     let _gameIsEnd = false;
 
+    const showWinner = document.querySelector("[data-showWinner]");
+    const showTurn = document.querySelector("[data-showTurn]");
+
     const switchCurrent = () => {
       _currentPlayerTurn =
         _currentPlayerTurn === _playerOne ? _playerTwo : _playerOne;
+      showTurn.innerHTML = `${_currentPlayerTurn.getMark().toUpperCase()}`;
     };
 
     const checkTie = () => _movesLeft === 0;
@@ -79,12 +83,12 @@
         el.every((item) => item.getMark() === _currentPlayerTurn.getMark())
       );
       if (flag) {
-        alert(`${_currentPlayerTurn.getName()} is the winner!`);
+        showWinner.innerHTML = `${_currentPlayerTurn.getName()} is the winner!`;
         _gameIsEnd = true;
         return;
       }
       if (checkTie()) {
-        alert("Tie game!");
+        showWinner.innerHTML = "Tie game!";
         _gameIsEnd = true;
         return;
       }
@@ -104,6 +108,8 @@
       _board = gameBoard.getBoard();
       _currentPlayerTurn = _playerOne;
       _gameIsEnd = false;
+      showWinner.innerHTML = "";
+      showTurn.innerHTML = "X ";
     };
     const isEnd = () => _gameIsEnd;
     return { playRound, resetGame, isEnd };
