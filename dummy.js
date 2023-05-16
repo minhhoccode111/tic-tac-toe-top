@@ -11,7 +11,7 @@ const gameBoard = (() => {
   const getField = (num) => _board[num];
   /**
    * Changes the sign of the field to the sign of the player
-   * @param {*} num number of field in the array from 0 to 8 sstarting from left top
+   * @param {*} num number of field in the array from 0 to 8 starting from left top
    * @param {*} player the player who changes the field
    */
   const setField = (num, player) => {

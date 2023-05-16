@@ -92,17 +92,30 @@
         _gameIsEnd = true;
         return;
       }
-      switchCurrent();
     };
     function playRound(num) {
       if (_board[num].getMark() != "") {
         return;
       }
-      _movesLeft--;
       gameBoard.placeMark(num, _currentPlayerTurn);
+      _movesLeft--;
       gameBoard.printBoard();
       checkWin();
+      switchCurrent();
     }
+    const aiPlayRound = () => {
+      const possibleMoves = _board.reduce((total, current, index) => {
+        if (current.getMark() === "") {
+          return [...total, index];
+        }
+        return total;
+      }, []);
+      console.log(possibleMoves);
+      let randomMove =
+        possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      console.log(randomMove);
+      playRound(randomMove);
+    };
     const resetGame = () => {
       _movesLeft = 9;
       _board = gameBoard.getBoard();
@@ -112,7 +125,7 @@
       showTurn.innerHTML = "X ";
     };
     const isEnd = () => _gameIsEnd;
-    return { playRound, resetGame, isEnd };
+    return { playRound, aiPlayRound, resetGame, isEnd };
   })();
 
   (() => {
@@ -127,6 +140,8 @@
       button.addEventListener("click", () => {
         if (controller.isEnd()) return;
         controller.playRound(index);
+        if (controller.isEnd()) return;
+        controller.aiPlayRound();
       });
     });
   })();
