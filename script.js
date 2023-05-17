@@ -12,9 +12,13 @@
     const setMark = (mark) => {
       _value = mark;
     };
+    const reset = () => {
+      _value = "";
+    };
     return {
       getMark,
       setMark,
+      reset,
     };
   }
   const gameBoard = (() => {
@@ -52,9 +56,9 @@
     playerTwoName = "Player Two"
   ) => {
     let _board = gameBoard.getBoard();
-    let _playerOne = Player(playerOneName, "x");
-    let _playerTwo = Player(playerTwoName, "o");
-    let _currentPlayerTurn = _playerOne;
+    const _huPlayer = Player(playerOneName, "x");
+    const _aiPlayer = Player(playerTwoName, "o");
+    let _currentPlayerTurn = _huPlayer;
     let _movesLeft = 9;
     let _gameIsEnd = false;
 
@@ -63,71 +67,139 @@
 
     const switchCurrent = () => {
       _currentPlayerTurn =
-        _currentPlayerTurn === _playerOne ? _playerTwo : _playerOne;
+        _currentPlayerTurn === _huPlayer ? _aiPlayer : _huPlayer;
       showTurn.innerHTML = `${_currentPlayerTurn.getMark().toUpperCase()}`;
     };
-
-    const checkTie = () => _movesLeft === 0;
-    const checkWin = () => {
-      let wins = [
-        [_board[0], _board[1], _board[2]],
-        [_board[3], _board[4], _board[5]],
-        [_board[6], _board[7], _board[8]],
-        [_board[0], _board[3], _board[6]],
-        [_board[1], _board[4], _board[7]],
-        [_board[2], _board[5], _board[8]],
-        [_board[0], _board[4], _board[8]],
-        [_board[2], _board[4], _board[6]],
-      ];
-      let flag = wins.some((el) =>
-        el.every((item) => item.getMark() === _currentPlayerTurn.getMark())
-      );
-      if (flag) {
-        showWinner.innerHTML = `${_currentPlayerTurn.getName()} is the winner!`;
-        _gameIsEnd = true;
-        return;
-      }
-      if (checkTie()) {
+    const getAi = () => _aiPlayer;
+    const getHuman = () => _huPlayer;
+    const getBoard = () => _board;
+    const getCurrentPlayer = () => _currentPlayerTurn;
+    const checkTie = () => {
+      if (_movesLeft === 0) {
         showWinner.innerHTML = "Tie game!";
         _gameIsEnd = true;
-        return;
+        return true;
       }
+      return false;
+    };
+    const checkWin = (board, player) => {
+      let wins = [
+        [board[0], board[1], board[2]],
+        [board[3], board[4], board[5]],
+        [board[6], board[7], board[8]],
+        [board[0], board[3], board[6]],
+        [board[1], board[4], board[7]],
+        [board[2], board[5], board[8]],
+        [board[0], board[4], board[8]],
+        [board[2], board[4], board[6]],
+      ];
+      let flag = wins.some((el) =>
+        el.every((item) => item.getMark() === player.getMark())
+      );
+      if (flag) {
+        showWinner.innerHTML = `${player.getName()} is the winner!`;
+        _gameIsEnd = true;
+        return true;
+      }
+      return false;
     };
     function playRound(num) {
       if (_board[num].getMark() != "") {
         return;
       }
       gameBoard.placeMark(num, _currentPlayerTurn);
-      _movesLeft--;
       gameBoard.printBoard();
-      checkWin();
+      checkWin(_board, _currentPlayerTurn);
+      _movesLeft--;
+      checkTie();
       switchCurrent();
     }
-    const aiPlayRound = () => {
-      const possibleMoves = _board.reduce((total, current, index) => {
-        if (current.getMark() === "") {
-          return [...total, index];
+    function minimax(newBoard, player) {
+      let availSpots = newBoard.reduce(
+        (total, current, index) =>
+          current.getMark() === "" ? [...total, index] : total,
+        []
+      );
+      if (checkWin(_board, _huPlayer)) {
+        return { score: -10 };
+      } else if (checkWin(_board, _aiPlayer)) {
+        return { score: 10 };
+      } else if (availSpots.length === 0) {
+        return { score: 0 };
+      }
+      //an array to collect all the objects
+      let moves = [];
+
+      //loop through available spots
+      for (let i = 0; i < availSpots.length; i++) {
+        //create an object for each and store the index of that spot
+        let move = {};
+        move.index = newBoard.indexOf(newBoard[availSpots[i]]);
+
+        //set the empty spot to the current player
+        newBoard[availSpots[i]].setMark(player.getMark());
+
+        //collect the score resulted from calling minimax on the opponent of the current player
+        if (player === _aiPlayer) {
+          let result = minimax(newBoard, _huPlayer);
+          move.score = result.score;
+        } else {
+          let result = minimax(newBoard, _aiPlayer);
+          move.score = result.score;
         }
-        return total;
-      }, []);
-      console.log(possibleMoves);
-      let randomMove =
-        possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-      console.log(randomMove);
-      playRound(randomMove);
-    };
+
+        //reset the spot to empty
+        newBoard[availSpots[i]].reset();
+        _gameIsEnd = false;
+        showWinner.innerHTML = "";
+
+        //push the object to the array
+        moves.push(move);
+      }
+
+      //if it is the computer's turn loop over the moves and choose the move with the highest score
+      let bestMove;
+      if (player === _aiPlayer) {
+        let bestScore = -10000;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score > bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      } else {
+        let bestScore = 10000;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score < bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      }
+
+      //return the chosen move (object) from the moves array
+      return moves[bestMove];
+    }
     const resetGame = () => {
       _movesLeft = 9;
       _board = gameBoard.getBoard();
-      _currentPlayerTurn = _playerOne;
+      _currentPlayerTurn = _huPlayer;
       _gameIsEnd = false;
       showWinner.innerHTML = "";
       showTurn.innerHTML = "X ";
     };
     const isEnd = () => _gameIsEnd;
-    return { playRound, aiPlayRound, resetGame, isEnd };
+    return {
+      playRound,
+      getBoard,
+      minimax,
+      resetGame,
+      isEnd,
+      getAi,
+      getHuman,
+      getCurrentPlayer,
+    };
   })();
-
   (() => {
     const reset = document.querySelector("[data-restart]");
     const buttons = document.querySelectorAll(".item");
@@ -141,7 +213,9 @@
         if (controller.isEnd()) return;
         controller.playRound(index);
         if (controller.isEnd()) return;
-        controller.aiPlayRound();
+        controller.playRound(
+          controller.minimax(controller.getBoard(), controller.getAi()).index
+        );
       });
     });
   })();
