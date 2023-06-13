@@ -20,28 +20,69 @@ body {
   text-align: center;
   margin-bottom: 2rem;
 }
-#gameBoard {
-  /* background-color: violet; */
-  height: 18rem;
-  width: 18rem;
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+h1 {
+  text-transform: uppercase;
+}
+#game {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  gap: 10px;
+}
+.ctn-grid {
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.ctn-grid > h2 {
+  font-size: 3vmin;
+}
+.ctn-grid > .reset-btn {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20vmin;
+  padding: 1vmin;
+  text-transform: uppercase;
+}
+.grid {
+  display: grid;
+  justify-content: center;
+  align-items: center;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
+  width: 20vmin;
+  height: 20vmin;
 }
 .item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 100%;
   width: 100%;
-  opacity: 0.5;
-  font-size: 2rem;
-  flex: 1;
 }
-#showTurn {
-  margin-top: 2rem;
+#buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 20vmin);
+  gap: 20px;
 }
-#showWinner {
-  margin-top: 2rem;
+#buttons > * {
+  text-transform: uppercase;
+  padding: 1vmin;
 }
-#restart {
-  margin-top: 2rem;
-  padding: 1rem;
+#message,
+#message-modes {
+  text-transform: uppercase;
+}
+:disabled {
+  opacity: 0.1;
 }

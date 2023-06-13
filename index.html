@@ -9,27 +9,73 @@
   </head>
   <body>
     <div id="wrapper">
-      <h1 class="title">Tic Tac Toe Game</h1>
-      <h3>Player One: X</h3>
-      <h3>Player Two: O</h3>
-      <br />
-      <div id="gameBoard" data-gameBoard>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
-        <button class="item"><p></p></button>
+      <h1 id="title">tic tac toe</h1>
+      <div id="game">
+        <div id="game-ui" class="ctn-grid">
+          <h2 class="play-with">Play manually</h2>
+          <div id="game-board" class="grid">
+            <button data-0 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-1 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-2 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-3 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-4 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-5 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-6 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-7 class="btn-input item">
+              <p></p>
+            </button>
+            <button data-8 class="btn-input item">
+              <p></p>
+            </button>
+          </div>
+          <button id="reset" class="reset-btn">Reset</button>
+        </div>
+        <div id="game-accessibility" class="ctn-grid">
+          <h2 class="play-with">Play with your keyword</h2>
+          <div id="access-board" class="grid">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+          </div>
+          <div id="access-reset" class="reset-btn">Enter</div>
+        </div>
       </div>
-      <h3 id="showTurn"><span data-showTurn>X</span> turn.</h3>
-      <h3 id="showWinner"><span data-showWinner></span></h3>
-      <button id="restart" data-restart>Restart</button>
+      <hr />
+      <div>Player X move first.</div>
+      <hr />
+      <div id="message-modes">mode: ez, human vs ai</div>
+      <div id="message"></div>
+      <hr />
+      <div id="buttons">
+        <button id="vsAi" disabled>human vs ai</button>
+        <button id="vsHu">human vs human</button>
+        <button id="easy">ez</button>
+        <button id="medium">medium</button>
+        <button id="hard">hard</button>
+        <button id="asian">asian</button>
+      </div>
     </div>
-    <script src="./script.js" defer></script>
-    <!-- <script src="./humanVsHumanInConsole.js" defer></script> -->
-    <!-- <script src="./humanVsHumanWithUI.js" defer></script> -->
+    <!-- <script src="./script.js" type="module" defer></script> -->
+    <script src="./new.js" type="module" defer></script>
   </body>
 </html>
