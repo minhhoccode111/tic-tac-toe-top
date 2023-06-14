@@ -35,6 +35,14 @@ The Odin Project Tic Tac Toe Game project to practice Factory Functions and The 
 
 ### LET'S PUT THE WALLS ON!
 
+This game can be played with both interactive and keyboard
+
+1,2,3,4,5,6,7,8,9 keys are used to make a move
+
+Enter is used to reset game
+
+This game displays is both UI and console
+
 [View all my projects Live demo links](https://minhhoccode111.github.io/allProjectssLiveDemo/)
 
 [View this project Live demo](https://minhhoccode111.github.io/ticTacToeTOP/)
