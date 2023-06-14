@@ -105,12 +105,10 @@ const board = (() => {
 
 //#################### AI ####################
 const ai = (() => {
-  let _mode = 2; //see 2,4,6,8 moves ahead using minimax algorithm
+  let _mode = 6; //see 2,4,6,8 moves ahead using minimax algorithm
   const winnable = board.winnable;
 
   const setMode = (mode) => (_mode = mode);
-
-  const deepCopy = () => JSON.parse(JSON.stringify(board.getGrid()));
 
   const available = (grid) => grid.filter((spot) => spot != "x" && spot != "o");
 
@@ -121,62 +119,66 @@ const ai = (() => {
       win.every((cell) => grid[cell] === "x" || grid[cell] === "o")
     );
 
-  const makeMove = (move, mark, state) => {
-    let [...nextState] = state;
-    nextState[move] = mark;
-    return nextState;
-  };
-
-  //If game is already ended when we first check the conditions in the beginning of minimax function call, then the player made the winning move is not this current player. So if this function call has maximizingPlayer is true then we know the one made the winning move is MIN player and vice versa
   const evaluate = (grid, maximizingPlayer) => {
-    if (isTerminal(grid))
-      return maximizingPlayer ? { score: -10 } : { score: 10 };
+    if (isTerminal(grid) && maximizingPlayer) return { score: -1 };
+    if (isTerminal(grid) && !maximizingPlayer) return { score: 1 };
     if (available(grid).length === 0) return { score: 0 };
-    return maximizingPlayer ? { score: -10000 } : { score: 10000 };
-    // if (isTerminal(grid) && !maximizingPlayer) return +10;
-    // if (isTerminal(grid) && maximizingPlayer) return -10;
+    return { score: 0 };
   };
 
   function useMinimax(maxMark, minMark) {
-    const maxPlayer = true;
-    const currentState = board.getGrid();
-    // const currentState = deepCopy();
-    const depth = 9;
-    // const depth = _mode;
-    return minimax(currentState, depth, maxPlayer, maxMark, minMark);
+    console.log(board.getGrid(), _mode, true, maxMark, minMark);
+    const state = board.getGrid();
+    return minimax(state, _mode, true, maxMark, minMark);
   }
-  function minimax(state, depth, maximizingPlayer, maxMark, minMark) {
-    if (depth === 0 || isTerminal(state) || isTie(state)) {
-      return evaluate(state, maximizingPlayer);
+  function minimax(board, depth, maximizingPlayer, maxMark, minMark) {
+    if (depth === 0 || isTerminal(board) || isTie(board)) {
+      console.log(evaluate(board, maximizingPlayer));
+      return evaluate(board, maximizingPlayer);
     }
-    let availArr = available(state);
-
-    let moves = [];
 
     if (maximizingPlayer) {
-      let bestScore = -20;
-      for (let move of availArr) {
-        state[availArr[move]] = maxMark;
-        let score = minimax(state, depth - 1, false, maxMark, minMark);
+      let bestScore = -100000;
+      let bestMove;
+      let availArr = available(board);
+      for (let i = availArr.length - 1; i >= 0; i--) {
+        const move = availArr[i];
+        let clonedBoard = [...board];
+        clonedBoard[move] = maxMark;
+        let { score } = minimax(
+          clonedBoard,
+          depth - 1,
+          false,
+          maxMark,
+          minMark
+        );
+        board[move] = move;
         if (bestScore < score) {
           bestScore = score;
+          bestMove = move;
         }
-        state[availArr[move]] = availArr[move];
-        console.log(bestScore);
-        return bestScore;
       }
+
+      console.log({ score: bestScore, move: bestMove });
+      return { score: bestScore, move: bestMove };
     } else {
-      let bestScore = 20;
-      for (let move of availArr) {
-        state[availArr[move]] = minMark;
-        let score = minimax(state, depth - 1, true, maxMark, minMark);
+      let bestScore = 100000;
+      let bestMove;
+      let availArr = available(board);
+      for (let i = availArr.length - 1; i >= 0; i--) {
+        const move = availArr[i];
+        let clonedBoard = [...board];
+        clonedBoard[move] = minMark;
+        let { score } = minimax(clonedBoard, depth - 1, true, maxMark, minMark);
+        board[move] = move;
         if (bestScore > score) {
           bestScore = score;
+          bestMove = move;
         }
-        state[availArr[move]] = availArr[move];
-        console.log(bestScore);
-        return bestScore;
       }
+
+      console.log({ score: bestScore, move: bestMove });
+      return { score: bestScore, move: bestMove };
     }
   }
   return {
@@ -216,12 +218,13 @@ const controller = (() => {
       maxMark = "o";
       minMark = "x";
     } else if (mark === "x") {
-      minMark = "o";
       maxMark = "x";
+      minMark = "o";
     }
+    console.log(maxMark, minMark);
     const move = ai.useMinimax(maxMark, minMark);
     console.log(move);
-    playRound(move, mark);
+    playRound(move.move, mark);
   };
 
   const playRound = (i, mark) => {
