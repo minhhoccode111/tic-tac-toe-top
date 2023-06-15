@@ -105,7 +105,7 @@ const board = (() => {
 
 //#################### AI ####################
 const ai = (() => {
-  let _mode = 6; //see 2,4,6,8 moves ahead using minimax algorithm
+  let _mode = 9; //see 2,4,6,8 moves ahead using minimax algorithm
   const winnable = board.winnable;
 
   const setMode = (mode) => (_mode = mode);
@@ -114,72 +114,64 @@ const ai = (() => {
 
   const isTie = (grid) => available(grid).length === 0;
 
-  const isTerminal = (grid) =>
-    winnable.some((win) =>
-      win.every((cell) => grid[cell] === "x" || grid[cell] === "o")
-    );
-
-  const evaluate = (grid, maximizingPlayer, maxMark, minMark) => {
-    if (isTerminal(grid) && maximizingPlayer) return { score: -1 };
-    if (isTerminal(grid) && !maximizingPlayer) return { score: 1 };
-    if (available(grid).length === 0) return { score: 0 };
-    return { score: 0 };
-  };
+  const isTerminal = (grid, mark) =>
+    winnable.some((win) => win.every((cell) => grid[cell] === mark));
 
   function useMinimax(maxMark, minMark) {
-    console.log(board.getGrid(), _mode, true, maxMark, minMark);
     const state = board.getGrid();
+    console.log(state, _mode, true, maxMark, minMark);
     return minimax(state, _mode, true, maxMark, minMark);
   }
   function minimax(board, depth, maximizingPlayer, maxMark, minMark) {
-    if (depth === 0 || isTerminal(board) || isTie(board)) {
-      console.log(evaluate(board, maximizingPlayer));
-      return evaluate(board, maximizingPlayer);
+    let availArr = available(board);
+
+    // if (depth === 0) return { score: 0 };
+    if (isTerminal(board, maxMark)) return { score: 1 };
+    if (isTerminal(board, minMark)) return { score: -1 };
+    if (isTie(board)) return { score: 0 };
+
+    let moves = [];
+
+    for (let i = availArr.length - 1; i >= 0; i--) {
+      let move = {}; //declare an object
+      const spot = availArr[i]; //current spot
+      move.index = board[spot]; //save current move's index
+
+      if (maximizingPlayer) {
+        //if max player
+        board[spot] = maxMark; //change spot to maximizing player's mark
+        //let result equal to minimax with min player
+        let result = minimax(board, depth - 1, false, maxMark, minMark);
+        move.score = result.score; //set move's score property to the returned object(which will be another move object inside minimax recursion)'s score
+      } else {
+        board[spot] = minMark;
+        let result = minimax(board, depth - 1, true, maxMark, minMark);
+        move.score = result.score;
+      }
+      board[spot] = move.index; //reset to empty
+      moves.push(move); //push each move object
     }
 
+    let bestMove;
     if (maximizingPlayer) {
-      let bestScore = -Infinity;
-      let bestMove;
-      let availArr = available(board);
-      for (let i = availArr.length - 1; i >= 0; i--) {
-        const move = availArr[i];
-        let [...clonedBoard] = board;
-        clonedBoard[move] = maxMark;
-        let { score } = minimax(
-          clonedBoard,
-          depth - 1,
-          false,
-          maxMark,
-          minMark
-        );
-        // board[move] = move;
-        if (bestScore < score) {
-          bestScore = score;
-          bestMove = move;
+      let bestScore = -10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score > bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
         }
       }
-
-      console.log({ score: bestScore, move: bestMove });
-      return { score: bestScore, move: bestMove };
     } else {
-      let bestScore = Infinity;
-      let bestMove;
-      let availArr = available(board);
-      for (let i = availArr.length - 1; i >= 0; i--) {
-        const move = availArr[i];
-        let [...clonedBoard] = board;
-        clonedBoard[move] = minMark;
-        let { score } = minimax(clonedBoard, depth - 1, true, maxMark, minMark);
-        // board[move] = move;
-        if (bestScore > score) {
-          bestScore = score;
-          bestMove = move;
+      let bestScore = 10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score < bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
         }
       }
-
-      console.log({ score: bestScore, move: bestMove });
-      return { score: bestScore, move: bestMove };
     }
+    console.log(moves[bestMove]);
+    return moves[bestMove];
   }
   return {
     useMinimax,
@@ -217,10 +209,9 @@ const controller = (() => {
       maxMark = "x";
       minMark = "o";
     }
-    console.log(maxMark, minMark);
     const move = ai.useMinimax(maxMark, minMark);
     console.log(move);
-    playRound(move.move, mark);
+    playRound(move.index, mark);
   };
 
   const playRound = (i, mark) => {
