@@ -21,6 +21,9 @@ function Player(mark, bot) {
 const display = (() => {
   const paras = document.querySelectorAll("[data-input]>p");
   const message = document.getElementById("message");
+  const modeDiff = document.getElementById("mode-diff");
+  const humanChoose = document.getElementById("human-choose");
+  const modeVs = document.getElementById("mode-vs");
 
   const dp = (board) => {
     // console.log(board);
@@ -47,11 +50,17 @@ const display = (() => {
   const reset = () => {
     paras.forEach((el) => (el.textContent = ""));
   };
-  const displayGameMode = (mode) => {};
+  const displayGameMode = (mode) => {
+    modeVs.textContent = mode;
+  };
 
-  const displayHumanMark = (mark) => {};
+  const displayHumanMark = (mark) => {
+    humanChoose.textContent = mark;
+  };
 
-  const displayDifficulty = (diff) => {};
+  const displayDifficulty = (diff) => {
+    modeDiff.textContent = diff;
+  };
 
   return {
     invalid,
@@ -181,7 +190,6 @@ const ai = (() => {
         }
       }
     }
-    console.log(moves[bestMove]);
     return moves[bestMove];
   }
   return {
@@ -306,16 +314,49 @@ const listener = (() => {
   oMark.addEventListener("click", (e) => {
     controller.switchMark();
     controller.reset();
-    display.mark("O");
+    display.mark("HUMAN IS O");
     disable(oMark);
     enable(xMark);
   });
+
   xMark.addEventListener("click", (e) => {
     controller.switchMark();
     controller.reset();
-    display.mark("X");
+    display.mark("HUMAN IS X");
     disable(xMark);
     enable(oMark);
+  });
+
+  vsHu.addEventListener("click", (e) => {
+    controller.switchVs(2);
+    controller.reset();
+    display.mode("HUMAN VS HUMAN");
+    disable(vsHu, oMark, xMark, ez, hard);
+    enable(vsAi);
+  });
+
+  vsAi.addEventListener("click", () => {
+    controller.switchVs(1);
+    controller.reset();
+    display.mode("HUMAN VS AI");
+    disable(vsAi, xMark, ez);
+    enable(vsHu, oMark, hard);
+  });
+
+  ez.addEventListener("click", () => {
+    ai.switchMode();
+    controller.reset();
+    display.diff("EZ");
+    disable(ez);
+    enable(hard);
+  });
+
+  hard.addEventListener("click", () => {
+    ai.switchMode();
+    controller.reset();
+    display.diff("HARD");
+    disable(hard);
+    enable(ez);
   });
 
   window.addEventListener("DOMContentLoaded", () => {
@@ -323,7 +364,7 @@ const listener = (() => {
     enable(hard, oMark, vsHu);
     controller.switchVs(1);
     display.mode(`HUMAN VS AI`);
-    display.mark("X");
+    display.mark("HUMAN CHOOSE X");
     display.diff("EZ");
   });
 
