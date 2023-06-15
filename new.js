@@ -6,7 +6,7 @@ function Player(mark, bot) {
   let _mark = mark;
   const getMark = () => _mark;
   const setMark = (value) => (_mark = value);
-  const isBot = () => bot;
+  const isBot = () => _bot;
   const toBot = (boolean) => (_bot = boolean);
   return {
     getMark,
@@ -23,7 +23,7 @@ const display = (() => {
   const message = document.getElementById("message");
 
   const dp = (board) => {
-    console.log(board);
+    // console.log(board);
     for (let i = board.length - 1; i >= 0; i--) {
       if (board[i] === "x" || board[i] === "o") {
         paras[i].textContent = board[i].toUpperCase();
@@ -32,21 +32,26 @@ const display = (() => {
   };
 
   const winner = (mark) => {
-    console.log(`${mark.toUpperCase()} is the winner!`);
+    // console.log(`${mark.toUpperCase()} is the winner!`);
     message.textContent = `${mark.toUpperCase()} is the winner!`;
   };
 
   const tie = () => {
-    console.log(`It's a tie game!`);
+    // console.log(`It's a tie game!`);
     message.textContent = `It's a tie game!`;
   };
   const invalid = (mark) => {
-    console.log(`${mark.toUpperCase()} just made an invalid move! Move again!`);
+    // console.log(`${mark.toUpperCase()} just made an invalid move! Move again!`);
     message.textContent = `${mark.toUpperCase()} just made an invalid move! Move again!`;
   };
   const reset = () => {
     paras.forEach((el) => (el.textContent = ""));
   };
+  const displayGameMode = (mode) => {};
+
+  const displayHumanMark = (mark) => {};
+
+  const displayDifficulty = (diff) => {};
 
   return {
     invalid,
@@ -54,6 +59,9 @@ const display = (() => {
     reset,
     tie,
     dp,
+    diff: displayDifficulty,
+    mark: displayHumanMark,
+    mode: displayGameMode,
   };
 })();
 
@@ -105,10 +113,10 @@ const board = (() => {
 
 //#################### AI ####################
 const ai = (() => {
-  let _mode = 9; //see 2,4,6,8 moves ahead using minimax algorithm
+  let _mode = "ez";
   const winnable = board.winnable;
 
-  const setMode = (mode) => (_mode = mode);
+  const switchMode = () => (_mode === "ez" ? (_mode = "hard") : (_mode = "ez"));
 
   const available = (grid) => grid.filter((spot) => spot != "x" && spot != "o");
 
@@ -119,20 +127,23 @@ const ai = (() => {
 
   function useMinimax(maxMark, minMark) {
     const state = board.getGrid();
-    console.log(state, _mode, true, maxMark, minMark);
-    return minimax(state, _mode, true, maxMark, minMark);
+    const availArr = available(state);
+    if (_mode === "ez")
+      //if _mode is 'ez'
+      return { index: availArr[Math.floor(Math.random() * availArr.length)] };
+    return minimax(state, 6, true, maxMark, minMark); //else use minimax to see 6 moves ahead
   }
   function minimax(board, depth, maximizingPlayer, maxMark, minMark) {
     let availArr = available(board);
 
-    // if (depth === 0) return { score: 0 };
     if (isTerminal(board, maxMark)) return { score: 1 };
     if (isTerminal(board, minMark)) return { score: -1 };
     if (isTie(board)) return { score: 0 };
+    if (depth === 0) return { score: 0 };
 
     let moves = [];
 
-    for (let i = availArr.length - 1; i >= 0; i--) {
+    for (let i = 0; i < availArr.length; i++) {
       let move = {}; //declare an object
       const spot = availArr[i]; //current spot
       move.index = board[spot]; //save current move's index
@@ -175,7 +186,7 @@ const ai = (() => {
   }
   return {
     useMinimax,
-    setMode,
+    switchMode,
     available,
   };
 })();
@@ -193,11 +204,21 @@ const controller = (() => {
 
   const switchVs = (num) => {
     if (num === 1) player1.toBot(true);
-    if (num === 2) player1.toBot(false);
+    if (num === 2) {
+      player0.toBot(false);
+      player1.toBot(false);
+    }
   };
 
-  const switchMark = () =>
-    player0.getMark() === "x" ? player0.setMark("o") : player1.setMark("x");
+  const switchMark = () => {
+    if (!player0.isBot()) {
+      player0.toBot(true);
+      player1.toBot(false);
+    } else {
+      player0.toBot(false);
+      player1.toBot(true);
+    }
+  };
 
   const aiPlayRound = (mark) => {
     let maxMark;
@@ -210,7 +231,6 @@ const controller = (() => {
       minMark = "o";
     }
     const move = ai.useMinimax(maxMark, minMark);
-    console.log(move);
     playRound(move.index, mark);
   };
 
@@ -239,19 +259,22 @@ const controller = (() => {
     if (current.isBot()) aiPlayRound(current.getMark());
   };
 
+  const getCurrent = () => current;
+
   const reset = () => {
     gameEnded = false;
     current = player0;
     board.reset();
     display.reset();
+    if (current.isBot()) aiPlayRound(current.getMark());
   };
   return {
     switchCurrent,
     switchMark,
+    getCurrent,
+    playRound,
     switchVs,
     reset,
-    playRound,
-    current,
   };
 })();
 
@@ -259,11 +282,54 @@ const controller = (() => {
 const listener = (() => {
   const buttons = Array.from(document.querySelectorAll("[data-input]"));
   const resetBtn = document.getElementById("reset");
+  const xMark = document.getElementById("x-mark");
+  const oMark = document.getElementById("o-mark");
+  const vsHu = document.getElementById("vsHu");
+  const vsAi = document.getElementById("vsAi");
+  const ez = document.getElementById("ez");
+  const hard = document.getElementById("hard");
+
+  const d = "disabled";
+
+  const disable = (...arg) => {
+    for (const el of arg) {
+      el.setAttribute(d, true);
+    }
+  };
+
+  const enable = (...arg) => {
+    for (const el of arg) {
+      el.removeAttribute(d);
+    }
+  };
+
+  oMark.addEventListener("click", (e) => {
+    controller.switchMark();
+    controller.reset();
+    display.mark("O");
+    disable(oMark);
+    enable(xMark);
+  });
+  xMark.addEventListener("click", (e) => {
+    controller.switchMark();
+    controller.reset();
+    display.mark("X");
+    disable(xMark);
+    enable(oMark);
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    disable(ez, xMark, vsAi);
+    enable(hard, oMark, vsHu);
+    controller.switchVs(1);
+    display.mode(`HUMAN VS AI`);
+    display.mark("X");
+    display.diff("EZ");
+  });
 
   buttons.forEach((b) =>
     b.addEventListener("click", (e) => {
-      console.log(b.dataset.index);
-      controller.playRound(+b.dataset.index, controller.current.getMark());
+      controller.playRound(+b.dataset.index, controller.getCurrent().getMark());
     })
   );
 
@@ -272,11 +338,16 @@ const listener = (() => {
   window.addEventListener("keyup", (e) => {
     const arr = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
     if (arr.includes(e.key)) {
-      controller.playRound(arr.indexOf(e.key), controller.current.getMark());
+      controller.playRound(
+        arr.indexOf(e.key),
+        controller.getCurrent().getMark()
+      );
     }
     if (e.key === "Enter") {
       e.preventDefault();
       resetBtn.click();
     }
   });
+
+  return {};
 })();

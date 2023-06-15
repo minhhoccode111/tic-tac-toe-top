@@ -11,6 +11,9 @@ html {
 }
 body {
 }
+button {
+  cursor: pointer;
+}
 #wrapper {
   display: flex;
   align-items: center;
@@ -84,5 +87,6 @@ h1 {
   text-transform: uppercase;
 }
 :disabled {
+  /* display: none; */
   opacity: 0.1;
 }
