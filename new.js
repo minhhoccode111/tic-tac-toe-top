@@ -119,7 +119,7 @@ const ai = (() => {
       win.every((cell) => grid[cell] === "x" || grid[cell] === "o")
     );
 
-  const evaluate = (grid, maximizingPlayer) => {
+  const evaluate = (grid, maximizingPlayer, maxMark, minMark) => {
     if (isTerminal(grid) && maximizingPlayer) return { score: -1 };
     if (isTerminal(grid) && !maximizingPlayer) return { score: 1 };
     if (available(grid).length === 0) return { score: 0 };
@@ -138,12 +138,12 @@ const ai = (() => {
     }
 
     if (maximizingPlayer) {
-      let bestScore = -100000;
+      let bestScore = -Infinity;
       let bestMove;
       let availArr = available(board);
       for (let i = availArr.length - 1; i >= 0; i--) {
         const move = availArr[i];
-        let clonedBoard = [...board];
+        let [...clonedBoard] = board;
         clonedBoard[move] = maxMark;
         let { score } = minimax(
           clonedBoard,
@@ -152,7 +152,7 @@ const ai = (() => {
           maxMark,
           minMark
         );
-        board[move] = move;
+        // board[move] = move;
         if (bestScore < score) {
           bestScore = score;
           bestMove = move;
@@ -162,15 +162,15 @@ const ai = (() => {
       console.log({ score: bestScore, move: bestMove });
       return { score: bestScore, move: bestMove };
     } else {
-      let bestScore = 100000;
+      let bestScore = Infinity;
       let bestMove;
       let availArr = available(board);
       for (let i = availArr.length - 1; i >= 0; i--) {
         const move = availArr[i];
-        let clonedBoard = [...board];
+        let [...clonedBoard] = board;
         clonedBoard[move] = minMark;
         let { score } = minimax(clonedBoard, depth - 1, true, maxMark, minMark);
-        board[move] = move;
+        // board[move] = move;
         if (bestScore > score) {
           bestScore = score;
           bestMove = move;
@@ -208,10 +208,6 @@ const controller = (() => {
     player0.getMark() === "x" ? player0.setMark("o") : player1.setMark("x");
 
   const aiPlayRound = (mark) => {
-    // const move = ai.minimax();
-
-    // const avail = ai.available(board.getGrid());
-    // const move = avail[Math.floor(Math.random() * avail.length)];
     let maxMark;
     let minMark;
     if (mark === "o") {
