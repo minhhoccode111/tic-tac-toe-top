@@ -1,222 +1,394 @@
-//THIS JS FILE IS TIC TAC TOE GAME HUMAN VS HUMAN AND PLAY WITH HTML UI
+// console.log("Hello world from new.js!");
 
-(function () {
-  function Player(name, mark) {
-    const getName = () => name;
-    const getMark = () => mark;
-    return { getName, getMark };
-  }
-  function Cell() {
-    let _value = "";
-    const getMark = () => _value;
-    const setMark = (mark) => {
-      _value = mark;
-    };
-    const reset = () => {
-      _value = "";
-    };
-    return {
-      getMark,
-      setMark,
-      reset,
-    };
-  }
-  const gameBoard = (() => {
-    let _board = [
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-      Cell(),
-    ];
-    const getBoard = () => _board;
-    const placeMark = (num, player) => {
-      _board[num].setMark(player.getMark());
-    };
-    const printBoard = () => {
-      const buttons = document.querySelectorAll(".item");
-      for (let i = 0; i < buttons.length; i++) {
-        buttons[i].children[0].innerHTML = _board[i].getMark();
+//#################### PLAYER ####################
+function Player(mark, bot) {
+  let _bot = bot;
+  let _mark = mark;
+  const getMark = () => _mark;
+  const setMark = (value) => (_mark = value);
+  const isBot = () => _bot;
+  const toBot = (boolean) => (_bot = boolean);
+  return {
+    getMark,
+    setMark,
+    isBot,
+    toBot,
+  };
+}
+
+//#################### DISPLAY CONSOLE ####################
+//#################### DISPLAY UI ####################
+const display = (() => {
+  const paras = document.querySelectorAll("[data-input]>p");
+  const message = document.getElementById("message");
+  const modeDiff = document.getElementById("mode-diff");
+  const humanChoose = document.getElementById("human-choose");
+  const modeVs = document.getElementById("mode-vs");
+
+  const dp = (board) => {
+    // console.log(board);
+    for (let i = board.length - 1; i >= 0; i--) {
+      if (board[i] === "x" || board[i] === "o") {
+        paras[i].textContent = board[i].toUpperCase();
       }
-    };
-    const resetBoard = () => {
-      _board = _board.map((el) => (el = Cell()));
-      printBoard();
-    };
-
-    return { getBoard, placeMark, printBoard, resetBoard };
-  })();
-
-  const gameController = ((
-    playerOneName = "Player One",
-    playerTwoName = "Player Two"
-  ) => {
-    let _board = gameBoard.getBoard();
-    const _huPlayer = Player(playerOneName, "x");
-    const _aiPlayer = Player(playerTwoName, "o");
-    let _currentPlayerTurn = _huPlayer;
-    let _movesLeft = 9;
-    let _gameIsEnd = false;
-
-    const showWinner = document.querySelector("[data-showWinner]");
-    const showTurn = document.querySelector("[data-showTurn]");
-
-    const switchCurrent = () => {
-      _currentPlayerTurn =
-        _currentPlayerTurn === _huPlayer ? _aiPlayer : _huPlayer;
-      showTurn.innerHTML = `${_currentPlayerTurn.getMark().toUpperCase()}`;
-    };
-    const getAi = () => _aiPlayer;
-    const getHuman = () => _huPlayer;
-    const getBoard = () => _board;
-    const getCurrentPlayer = () => _currentPlayerTurn;
-    const checkTie = () => {
-      if (_movesLeft === 0) {
-        showWinner.innerHTML = "Tie game!";
-        _gameIsEnd = true;
-        return true;
-      }
-      return false;
-    };
-    const checkWin = (board, player) => {
-      let wins = [
-        [board[0], board[1], board[2]],
-        [board[3], board[4], board[5]],
-        [board[6], board[7], board[8]],
-        [board[0], board[3], board[6]],
-        [board[1], board[4], board[7]],
-        [board[2], board[5], board[8]],
-        [board[0], board[4], board[8]],
-        [board[2], board[4], board[6]],
-      ];
-      let flag = wins.some((el) =>
-        el.every((item) => item.getMark() === player.getMark())
-      );
-      if (flag) {
-        showWinner.innerHTML = `${player.getName()} is the winner!`;
-        _gameIsEnd = true;
-        return true;
-      }
-      return false;
-    };
-    function playRound(num) {
-      if (_board[num].getMark() != "") {
-        return;
-      }
-      gameBoard.placeMark(num, _currentPlayerTurn);
-      gameBoard.printBoard();
-      checkWin(_board, _currentPlayerTurn);
-      _movesLeft--;
-      checkTie();
-      switchCurrent();
     }
-    function minimax(newBoard, player) {
-      let availSpots = newBoard.reduce(
-        (total, current, index) =>
-          current.getMark() === "" ? [...total, index] : total,
-        []
-      );
-      if (checkWin(_board, _huPlayer)) {
-        return { score: -10 };
-      } else if (checkWin(_board, _aiPlayer)) {
-        return { score: 10 };
-      } else if (availSpots.length === 0) {
-        return { score: 0 };
-      }
-      //an array to collect all the objects
-      let moves = [];
+  };
 
-      //loop through available spots
-      for (let i = 0; i < availSpots.length; i++) {
-        //create an object for each and store the index of that spot
-        let move = {};
-        move.index = newBoard.indexOf(newBoard[availSpots[i]]);
+  const winner = (mark) => {
+    // console.log(`${mark.toUpperCase()} is the winner!`);
+    message.textContent = `${mark.toUpperCase()} is the winner!`;
+  };
 
-        //set the empty spot to the current player
-        newBoard[availSpots[i]].setMark(player.getMark());
+  const tie = () => {
+    // console.log(`It's a tie game!`);
+    message.textContent = `It's a tie game!`;
+  };
+  const invalid = (mark) => {
+    // console.log(`${mark.toUpperCase()} just made an invalid move! Move again!`);
+    message.textContent = `${mark.toUpperCase()} just made an invalid move! Move again!`;
+  };
+  const reset = () => {
+    paras.forEach((el) => (el.textContent = ""));
+  };
+  const displayGameMode = (mode) => {
+    modeVs.textContent = mode;
+  };
 
-        //collect the score resulted from calling minimax on the opponent of the current player
-        if (player === _aiPlayer) {
-          let result = minimax(newBoard, _huPlayer);
-          move.score = result.score;
-        } else {
-          let result = minimax(newBoard, _aiPlayer);
-          move.score = result.score;
-        }
+  const displayHumanMark = (mark) => {
+    humanChoose.textContent = mark;
+  };
 
-        //reset the spot to empty
-        newBoard[availSpots[i]].reset();
-        _gameIsEnd = false;
-        showWinner.innerHTML = "";
+  const displayDifficulty = (diff) => {
+    modeDiff.textContent = diff;
+  };
 
-        //push the object to the array
-        moves.push(move);
-      }
+  return {
+    invalid,
+    winner,
+    reset,
+    tie,
+    dp,
+    diff: displayDifficulty,
+    mark: displayHumanMark,
+    mode: displayGameMode,
+  };
+})();
 
-      //if it is the computer's turn loop over the moves and choose the move with the highest score
-      let bestMove;
-      if (player === _aiPlayer) {
-        let bestScore = -10000;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score > bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
-        }
+//#################### BOARD ####################
+const board = (() => {
+  let _grid = Array(9);
+  const winnable = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+  ];
+
+  for (let i = 0; i < 9; i++) {
+    _grid[i] = i;
+  }
+
+  const getGrid = () => _grid;
+
+  const isValid = (i) => _grid[i] !== "x" && _grid[i] !== "o";
+
+  const setGrid = (i, mark) => (_grid[i] = mark);
+
+  const isTie = () => _grid.every((spot) => spot === "x" || spot === "o");
+
+  const isWin = (mark) =>
+    winnable.some((wins) => wins.every((win) => _grid[win] === mark));
+
+  const reset = () => {
+    for (let i = 0; i < 9; i++) {
+      _grid[i] = i;
+    }
+  };
+
+  return {
+    winnable,
+    getGrid,
+    isValid,
+    setGrid,
+    reset,
+    isTie,
+    isWin,
+  };
+})();
+
+//#################### AI ####################
+const ai = (() => {
+  let _mode = "ez";
+  const winnable = board.winnable;
+
+  const switchMode = () => (_mode === "ez" ? (_mode = "hard") : (_mode = "ez"));
+
+  const available = (grid) => grid.filter((spot) => spot != "x" && spot != "o");
+
+  const isTie = (grid) => available(grid).length === 0;
+
+  const isTerminal = (grid, mark) =>
+    winnable.some((win) => win.every((cell) => grid[cell] === mark));
+
+  function useMinimax(maxMark, minMark) {
+    const state = board.getGrid();
+    const availArr = available(state);
+    if (_mode === "ez")
+      //if _mode is 'ez'
+      return { index: availArr[Math.floor(Math.random() * availArr.length)] };
+    return minimax(state, 6, true, maxMark, minMark); //else use minimax to see 6 moves ahead
+  }
+  function minimax(board, depth, maximizingPlayer, maxMark, minMark) {
+    let availArr = available(board);
+
+    if (isTerminal(board, maxMark)) return { score: 1 };
+    if (isTerminal(board, minMark)) return { score: -1 };
+    if (isTie(board)) return { score: 0 };
+    if (depth === 0) return { score: 0 };
+
+    let moves = [];
+
+    for (let i = 0; i < availArr.length; i++) {
+      let move = {}; //declare an object
+      const spot = availArr[i]; //current spot
+      move.index = board[spot]; //save current move's index
+
+      if (maximizingPlayer) {
+        //if max player
+        board[spot] = maxMark; //change spot to maximizing player's mark
+        //let result equal to minimax with min player
+        let result = minimax(board, depth - 1, false, maxMark, minMark);
+        move.score = result.score; //set move's score property to the returned object(which will be another move object inside minimax recursion)'s score
       } else {
-        let bestScore = 10000;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score < bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
+        board[spot] = minMark;
+        let result = minimax(board, depth - 1, true, maxMark, minMark);
+        move.score = result.score;
+      }
+      board[spot] = move.index; //reset to empty
+      moves.push(move); //push each move object
+    }
+
+    let bestMove;
+    if (maximizingPlayer) {
+      let bestScore = -10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score > bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
         }
       }
-
-      //return the chosen move (object) from the moves array
-      return moves[bestMove];
+    } else {
+      let bestScore = 10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score < bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
     }
-    const resetGame = () => {
-      _movesLeft = 9;
-      _board = gameBoard.getBoard();
-      _currentPlayerTurn = _huPlayer;
-      _gameIsEnd = false;
-      showWinner.innerHTML = "";
-      showTurn.innerHTML = "X ";
-    };
-    const isEnd = () => _gameIsEnd;
-    return {
-      playRound,
-      getBoard,
-      minimax,
-      resetGame,
-      isEnd,
-      getAi,
-      getHuman,
-      getCurrentPlayer,
-    };
-  })();
-  (() => {
-    const reset = document.querySelector("[data-restart]");
-    const buttons = document.querySelectorAll(".item");
-    const controller = gameController;
-    reset.addEventListener("click", () => {
-      gameBoard.resetBoard();
-      controller.resetGame();
-    });
-    buttons.forEach((button, index) => {
-      button.addEventListener("click", () => {
-        if (controller.isEnd()) return;
-        controller.playRound(index);
-        if (controller.isEnd()) return;
-        controller.playRound(
-          controller.minimax(controller.getBoard(), controller.getAi()).index
-        );
-      });
-    });
-  })();
+    return moves[bestMove];
+  }
+  return {
+    useMinimax,
+    switchMode,
+    available,
+  };
+})();
+
+//#################### CONTROLLER ####################
+const controller = (() => {
+  const player0 = Player("x", false);
+  const player1 = Player("o", true);
+
+  let current = player0;
+  let gameEnded = false;
+
+  const switchCurrent = () =>
+    current === player0 ? (current = player1) : (current = player0);
+
+  const switchVs = (num) => {
+    if (num === 1) player1.toBot(true);
+    if (num === 2) {
+      player0.toBot(false);
+      player1.toBot(false);
+    }
+  };
+
+  const switchMark = () => {
+    if (!player0.isBot()) {
+      player0.toBot(true);
+      player1.toBot(false);
+    } else {
+      player0.toBot(false);
+      player1.toBot(true);
+    }
+  };
+
+  const aiPlayRound = (mark) => {
+    let maxMark;
+    let minMark;
+    if (mark === "o") {
+      maxMark = "o";
+      minMark = "x";
+    } else if (mark === "x") {
+      maxMark = "x";
+      minMark = "o";
+    }
+    const move = ai.useMinimax(maxMark, minMark);
+    playRound(move.index, mark);
+  };
+
+  const playRound = (i, mark) => {
+    if (gameEnded) return;
+
+    if (!board.isValid(i)) return display.invalid(mark);
+
+    board.setGrid(i, mark);
+    display.dp(board.getGrid());
+
+    if (board.isWin(mark)) {
+      display.winner(mark);
+      gameEnded = true;
+      return;
+    }
+
+    if (board.isTie()) {
+      display.tie();
+      gameEnded = true;
+      return;
+    }
+
+    switchCurrent();
+
+    if (current.isBot()) aiPlayRound(current.getMark());
+  };
+
+  const getCurrent = () => current;
+
+  const reset = () => {
+    gameEnded = false;
+    current = player0;
+    board.reset();
+    display.reset();
+    if (current.isBot()) aiPlayRound(current.getMark());
+  };
+  return {
+    switchCurrent,
+    switchMark,
+    getCurrent,
+    playRound,
+    switchVs,
+    reset,
+  };
+})();
+
+//#################### LISTENER ####################
+const listener = (() => {
+  const buttons = Array.from(document.querySelectorAll("[data-input]"));
+  const resetBtn = document.getElementById("reset");
+  const xMark = document.getElementById("x-mark");
+  const oMark = document.getElementById("o-mark");
+  const vsHu = document.getElementById("vsHu");
+  const vsAi = document.getElementById("vsAi");
+  const ez = document.getElementById("ez");
+  const hard = document.getElementById("hard");
+
+  const d = "disabled";
+
+  const disable = (...arg) => {
+    for (const el of arg) {
+      el.setAttribute(d, true);
+    }
+  };
+
+  const enable = (...arg) => {
+    for (const el of arg) {
+      el.removeAttribute(d);
+    }
+  };
+
+  oMark.addEventListener("click", (e) => {
+    controller.switchMark();
+    controller.reset();
+    display.mark("HUMAN IS O");
+    disable(oMark);
+    enable(xMark);
+  });
+
+  xMark.addEventListener("click", (e) => {
+    controller.switchMark();
+    controller.reset();
+    display.mark("HUMAN IS X");
+    disable(xMark);
+    enable(oMark);
+  });
+
+  vsHu.addEventListener("click", (e) => {
+    controller.switchVs(2);
+    controller.reset();
+    display.mode("HUMAN VS HUMAN");
+    disable(vsHu, oMark, xMark, ez, hard);
+    enable(vsAi);
+  });
+
+  vsAi.addEventListener("click", () => {
+    controller.switchVs(1);
+    controller.reset();
+    display.mode("HUMAN VS AI");
+    disable(vsAi, xMark, ez);
+    enable(vsHu, oMark, hard);
+  });
+
+  ez.addEventListener("click", () => {
+    ai.switchMode();
+    controller.reset();
+    display.diff("EZ");
+    disable(ez);
+    enable(hard);
+  });
+
+  hard.addEventListener("click", () => {
+    ai.switchMode();
+    controller.reset();
+    display.diff("HARD");
+    disable(hard);
+    enable(ez);
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    disable(ez, xMark, vsAi);
+    enable(hard, oMark, vsHu);
+    controller.switchVs(1);
+    display.mode(`HUMAN VS AI`);
+    display.mark("HUMAN CHOOSE X");
+    display.diff("EZ");
+  });
+
+  buttons.forEach((b) =>
+    b.addEventListener("click", (e) => {
+      controller.playRound(+b.dataset.index, controller.getCurrent().getMark());
+    })
+  );
+
+  resetBtn.addEventListener("click", controller.reset);
+
+  window.addEventListener("keyup", (e) => {
+    const arr = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    if (arr.includes(e.key)) {
+      controller.playRound(
+        arr.indexOf(e.key),
+        controller.getCurrent().getMark()
+      );
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      resetBtn.click();
+    }
+  });
+
+  return {};
 })();
