@@ -1,4 +1,4 @@
-# ticTacToeTOP
+# Tic Tac Toe The Odin Project
 
 The Odin Project Tic Tac Toe Game project to practice Factory Functions and The Module Pattern.
 
@@ -43,6 +43,6 @@ Enter is used to reset game
 
 This game displays is both UI and console
 
-[View all my projects Live demo links](https://minhhoccode111.github.io/allProjectssLiveDemo/)
+[View all projects' live demos](https://minhhoccode111.github.io/all-projects-live-demos/) 
 
-[View this project Live demo](https://minhhoccode111.github.io/ticTacToeTOP/)
+[Tic Tac Toe TOP](https://minhhoccode111.github.io/tic-tac-toe-top/)
